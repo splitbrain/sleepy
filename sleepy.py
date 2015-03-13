@@ -3,7 +3,9 @@
 
 import Tkconstants as TkC
 from Tkinter import Tk, Frame, Label, PhotoImage
+import glob
 import json
+import os
 import sys
 import time
 import tkFont
@@ -16,6 +18,7 @@ import datetime
 class Weather(Frame):
     widgets = {}
     blank = None
+    images = {}
 
     def __init__(self, parent, w, h):
         """
@@ -29,6 +32,8 @@ class Weather(Frame):
             bg="gray",
         )
 
+        self.load_images()
+
         # to be able to size labels in pixels, they need an image assigned
         self.blank = PhotoImage(file="pix/Blank.gif")
 
@@ -40,8 +45,7 @@ class Weather(Frame):
             self.widgets[i]['frame'] = Frame(self, width=(w / 5), height=h, bg="black")
             self.widgets[i]['frame'].place(x=((w / 5) * i), y=0)
 
-            self.widgets[i]['icon'] = PhotoImage(file="pix/test.png")
-            self.widgets[i]['iconholder'] = Label(self.widgets[i]['frame'], image=self.widgets[i]['icon'], bg="black",
+            self.widgets[i]['iconholder'] = Label(self.widgets[i]['frame'], image=self.images['none'], bg="black",
                                                   borderwidth=0)
             self.widgets[i]['iconholder'].place(x=8, y=0)
 
@@ -52,6 +56,12 @@ class Weather(Frame):
             self.widgets[i]['line2'] = Label(self.widgets[i]['frame'], text="???", bg="black", fg="white",
                                              width=(w / 5), compound="center", image=self.blank, font=font8)
             self.widgets[i]['line2'].place(x=0, y=64)
+
+    def load_images(self):
+        for f in glob.glob('pix/weather/*.png'):
+            base = os.path.splitext(os.path.basename(f))[0]
+            self.images[base] = PhotoImage(file=f)
+
 
     def update_data(self, weather_data):
         """
@@ -69,7 +79,9 @@ class Weather(Frame):
                 text=weather_data['list'][i]['weather'][0]['main']
             )
 
-            print weather_data['list'][i]['weather'][0]['icon']
+            self.widgets[i]['iconholder'].config(
+                image=self.images[weather_data['list'][i]['weather'][0]['icon']]
+            )
 
 
 class Sleepy(Frame):
