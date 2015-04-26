@@ -86,6 +86,7 @@ class Weather(Frame):
 
 class Sleepy(Frame):
     clock = None
+    calendar = None
     weather = None
 
     def __init__(self, parent):
@@ -93,20 +94,27 @@ class Sleepy(Frame):
         self.parent = parent
         self.pack(fill=TkC.BOTH, expand=1)
 
-        clock_font = tkFont.Font(family='Droid Sans', size=52, weight='bold')
+
 
         # init the clock
-        self.clock = Label(self, text="23:25", fg="#7975ff", bg="black", font=clock_font)
+        clock_font = tkFont.Font(family='Droid Sans', size=52, weight='bold')
+        self.clock = Label(self, text="??:??", fg="#7975ff", bg="black", font=clock_font)
         self.clock.place(x=0, y=0)
-        self.update_clock()
 
-        #self.weather = Frame(self, height=80, width=320, bg="gray")
+        # init the calendar
+        calendar_font = tkFont.Font(family='Droid Sans', size=12)
+        self.calendar = Label(self, text="?? ?????, ???", fg="white", bg="black", font=calendar_font)
+        self.calendar.place(x=4, y=70)
+
+        # init the weather
         self.weather = Weather(self, 320, 80)
         self.weather.place(x=0, y=(240 - 80))
 
         #print tkFont.families()
         #('Century Schoolbook L', 'Droid Sans Mono', 'Droid Sans Ethiopic', 'Droid Sans Thai', 'DejaVu Sans Mono', 'URW Palladio L', 'Droid Arabic Naskh', 'URW Gothic L', 'Dingbats', 'URW Chancery L', 'FreeSerif', 'DejaVu Sans', 'Droid Sans Japanese', 'Droid Sans Georgian', 'Nimbus Sans L', 'Droid Serif', 'Droid Sans Hebrew', 'Droid Sans Fallback', 'Standard Symbols L', 'Nimbus Mono L', 'Nimbus Roman No9 L', 'FreeSans', 'DejaVu Serif', 'Droid Sans Armenian', 'FreeMono', 'URW Bookman L', 'Droid Sans')
 
+        # start working
+        self.update_clock()
         self.fetch_weather_thread()
 
     def update_clock(self):
@@ -115,6 +123,9 @@ class Sleepy(Frame):
         """
         now = time.strftime("%H:%M")
         self.clock.configure(text=now)
+        cal = time.strftime("%A, %B %d")
+        self.calendar.configure(text=cal)
+
         self.parent.after(10000, self.update_clock)
 
     def fetch_weather_thread(self):
