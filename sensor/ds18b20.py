@@ -2,7 +2,7 @@ import glob
 import time
 
 
-class Temperature:
+class DS18B20:
     """
     Manages reading the temperature sensor
 

@@ -151,7 +151,7 @@ class Sleepy(Frame):
         """
         Update the temperature every minute
         """
-        t = sensor.Temperature()
+        t = sensor.DS18B20()
         temp = "%0.2f °C" % (t.read_temp())
         self.temperature.configure(text=temp)
         self.parent.after(60*1000, self.update_temperature)
