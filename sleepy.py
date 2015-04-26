@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import Tkconstants as TkC
-from Tkinter import Tk, Frame, Label, PhotoImage
+from Tkinter import Tk, Frame, Label
+from PIL import ImageTk as itk
 import glob
 import json
 import os
@@ -35,7 +36,7 @@ class Weather(Frame):
         self.load_images()
 
         # to be able to size labels in pixels, they need an image assigned
-        self.blank = PhotoImage(file="pix/Blank.gif")
+        self.blank = itk.PhotoImage(file="pix/Blank.gif")
 
         font10 = tkFont.Font(family='Droid Sans', size=10)
         font8 = tkFont.Font(family='Droid Sans', size=8)
@@ -60,7 +61,7 @@ class Weather(Frame):
     def load_images(self):
         for f in glob.glob('pix/weather/*.png'):
             base = os.path.splitext(os.path.basename(f))[0]
-            self.images[base] = PhotoImage(file=f)
+            self.images[base] = itk.PhotoImage(file=f)
 
 
     def update_data(self, weather_data):
