@@ -4,6 +4,7 @@
 import Tkconstants as TkC
 from Tkinter import Tk, Frame, Label
 from PIL import ImageTk as itk
+import sensor
 import glob
 import json
 import os
@@ -47,7 +48,7 @@ class Weather(Frame):
         # to be able to size labels in pixels, they need an image assigned
         self.blank = itk.PhotoImage(file="pix/Blank.gif")
 
-        font10 = tkFont.Font(family='Droid Sans', size=10)
+        font10 = tkFont.Font(family='Droid Sans', size=9)
         font8 = tkFont.Font(family='Droid Sans', size=8)
 
         for i in range(0, 5):
@@ -68,6 +69,9 @@ class Weather(Frame):
             self.widgets[i]['line2'].place(x=0, y=64)
 
     def load_images(self):
+        """
+        Preloads the weather images
+        """
         for f in glob.glob('pix/weather/*.png'):
             base = os.path.splitext(os.path.basename(f))[0]
             self.images[base] = itk.PhotoImage(file=f)
@@ -98,13 +102,12 @@ class Sleepy(Frame):
     clock = None
     calendar = None
     weather = None
+    temperature = None
 
     def __init__(self, parent):
         Frame.__init__(self, parent, background=Palette.background)
         self.parent = parent
         self.pack(fill=TkC.BOTH, expand=1)
-
-
 
         # init the clock
         clock_font = tkFont.Font(family='Droid Sans', size=52, weight='bold')
@@ -117,14 +120,20 @@ class Sleepy(Frame):
         self.calendar.place(x=4, y=70)
 
         # init the weather
-        self.weather = Weather(self, 320, 80)
-        self.weather.place(x=0, y=(240 - 80))
+        self.weather = Weather(self, 320, 82)
+        self.weather.place(x=0, y=(240 - 82))
+
+        # init the temperature
+        temperature_font = tkFont.Font(family='Droid Sans', size=12)
+        self.temperature = Label(self, text="?? °C", fg=Palette.secondary, bg=Palette.background, font=temperature_font)
+        self.temperature.place(x=240, y=50)
 
         # print tkFont.families()
         # ('Century Schoolbook L', 'Droid Sans Mono', 'Droid Sans Ethiopic', 'Droid Sans Thai', 'DejaVu Sans Mono', 'URW Palladio L', 'Droid Arabic Naskh', 'URW Gothic L', 'Dingbats', 'URW Chancery L', 'FreeSerif', 'DejaVu Sans', 'Droid Sans Japanese', 'Droid Sans Georgian', 'Nimbus Sans L', 'Droid Serif', 'Droid Sans Hebrew', 'Droid Sans Fallback', 'Standard Symbols L', 'Nimbus Mono L', 'Nimbus Roman No9 L', 'FreeSans', 'DejaVu Serif', 'Droid Sans Armenian', 'FreeMono', 'URW Bookman L', 'Droid Sans')
 
         # start working
         self.update_clock()
+        self.update_temperature()
         self.fetch_weather_thread()
 
     def update_clock(self):
@@ -137,6 +146,15 @@ class Sleepy(Frame):
         self.calendar.configure(text=cal)
 
         self.parent.after(10000, self.update_clock)
+
+    def update_temperature(self):
+        """
+        Update the temperature every minute
+        """
+        t = sensor.Temperature()
+        temp = "%0.2f °C" % (t.read_temp())
+        self.temperature.configure(text=temp)
+        self.parent.after(60*1000, self.update_temperature)
 
     def fetch_weather_thread(self):
         """
@@ -167,8 +185,8 @@ class Sleepy(Frame):
             self.parent.after(1000 * 60 * 60, self.fetch_weather_thread)
         except urllib2.URLError as e:
             print e.reason
-            # call again in 10 minutes
-            self.parent.after(1000 * 60 * 10, self.fetch_weather_thread)
+            # call again in 1 minute
+            self.parent.after(1000 * 60 * 1, self.fetch_weather_thread)
 
 
 def main():
