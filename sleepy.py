@@ -16,6 +16,15 @@ import thread
 import datetime
 
 
+class Palette:
+    def __init__(self):
+        pass
+
+    background = "#192D2B"
+    primary = "#694330"
+    secondary = "#948358"
+
+
 class Weather(Frame):
     widgets = {}
     blank = None
@@ -43,18 +52,18 @@ class Weather(Frame):
 
         for i in range(0, 5):
             self.widgets[i] = {}
-            self.widgets[i]['frame'] = Frame(self, width=(w / 5), height=h, bg="black")
+            self.widgets[i]['frame'] = Frame(self, width=(w / 5), height=h, bg=Palette.background)
             self.widgets[i]['frame'].place(x=((w / 5) * i), y=0)
 
-            self.widgets[i]['iconholder'] = Label(self.widgets[i]['frame'], image=self.images['none'], bg="black",
+            self.widgets[i]['iconholder'] = Label(self.widgets[i]['frame'], image=self.images['none'], bg=Palette.background,
                                                   borderwidth=0)
             self.widgets[i]['iconholder'].place(x=8, y=0)
 
-            self.widgets[i]['line1'] = Label(self.widgets[i]['frame'], text="??h ??°", bg="black", fg="white",
+            self.widgets[i]['line1'] = Label(self.widgets[i]['frame'], text="??h ??°", bg=Palette.background, fg=Palette.secondary,
                                              width=(w / 5), compound="center", image=self.blank, font=font10)
             self.widgets[i]['line1'].place(x=0, y=48)
 
-            self.widgets[i]['line2'] = Label(self.widgets[i]['frame'], text="???", bg="black", fg="white",
+            self.widgets[i]['line2'] = Label(self.widgets[i]['frame'], text="???", bg=Palette.background, fg=Palette.secondary,
                                              width=(w / 5), compound="center", image=self.blank, font=font8)
             self.widgets[i]['line2'].place(x=0, y=64)
 
@@ -91,7 +100,7 @@ class Sleepy(Frame):
     weather = None
 
     def __init__(self, parent):
-        Frame.__init__(self, parent, background="black")
+        Frame.__init__(self, parent, background=Palette.background)
         self.parent = parent
         self.pack(fill=TkC.BOTH, expand=1)
 
@@ -99,20 +108,20 @@ class Sleepy(Frame):
 
         # init the clock
         clock_font = tkFont.Font(family='Droid Sans', size=52, weight='bold')
-        self.clock = Label(self, text="??:??", fg="#7975ff", bg="black", font=clock_font)
+        self.clock = Label(self, text="??:??", fg=Palette.primary, bg=Palette.background, font=clock_font)
         self.clock.place(x=0, y=0)
 
         # init the calendar
         calendar_font = tkFont.Font(family='Droid Sans', size=12)
-        self.calendar = Label(self, text="?? ?????, ???", fg="white", bg="black", font=calendar_font)
+        self.calendar = Label(self, text="?? ?????, ???", fg=Palette.secondary, bg=Palette.background, font=calendar_font)
         self.calendar.place(x=4, y=70)
 
         # init the weather
         self.weather = Weather(self, 320, 80)
         self.weather.place(x=0, y=(240 - 80))
 
-        #print tkFont.families()
-        #('Century Schoolbook L', 'Droid Sans Mono', 'Droid Sans Ethiopic', 'Droid Sans Thai', 'DejaVu Sans Mono', 'URW Palladio L', 'Droid Arabic Naskh', 'URW Gothic L', 'Dingbats', 'URW Chancery L', 'FreeSerif', 'DejaVu Sans', 'Droid Sans Japanese', 'Droid Sans Georgian', 'Nimbus Sans L', 'Droid Serif', 'Droid Sans Hebrew', 'Droid Sans Fallback', 'Standard Symbols L', 'Nimbus Mono L', 'Nimbus Roman No9 L', 'FreeSans', 'DejaVu Serif', 'Droid Sans Armenian', 'FreeMono', 'URW Bookman L', 'Droid Sans')
+        # print tkFont.families()
+        # ('Century Schoolbook L', 'Droid Sans Mono', 'Droid Sans Ethiopic', 'Droid Sans Thai', 'DejaVu Sans Mono', 'URW Palladio L', 'Droid Arabic Naskh', 'URW Gothic L', 'Dingbats', 'URW Chancery L', 'FreeSerif', 'DejaVu Sans', 'Droid Sans Japanese', 'Droid Sans Georgian', 'Nimbus Sans L', 'Droid Serif', 'Droid Sans Hebrew', 'Droid Sans Fallback', 'Standard Symbols L', 'Nimbus Mono L', 'Nimbus Roman No9 L', 'FreeSans', 'DejaVu Serif', 'Droid Sans Armenian', 'FreeMono', 'URW Bookman L', 'Droid Sans')
 
         # start working
         self.update_clock()
