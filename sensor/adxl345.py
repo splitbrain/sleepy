@@ -9,11 +9,6 @@
 
 import smbus
 
-# select the correct i2c bus for this revision of Raspberry Pi
-revision = ([l[12:-1] for l in open('/proc/cpuinfo', 'r').readlines() if l[:8] == "Revision"] + ['0000'])[0]
-bus = smbus.SMBus(1 if int(revision, 16) >= 4 else 0)
-
-
 class ADXL345:
     # ADXL345 constants
     EARTH_GRAVITY_MS2 = 9.80665
@@ -40,28 +35,34 @@ class ADXL345:
     AXES_DATA = 0x32
 
     address = None
+    bus = None
 
     def __init__(self, address=0x53):
+        # select the correct i2c bus for this revision of Raspberry Pi
+        revision = ([l[12:-1] for l in open('/proc/cpuinfo', 'r').readlines() if l[:8] == "Revision"] + ['0000'])[0]
+        self.bus = smbus.SMBus(1 if int(revision, 16) >= 4 else 0)
+
+
         self.address = address
         self.setBandwidthRate(self.BW_RATE_100HZ)
         self.setRange(self.RANGE_2G)
         self.enableMeasurement()
 
     def enableMeasurement(self):
-        bus.write_byte_data(self.address, self.POWER_CTL, self.MEASURE)
+        self.bus.write_byte_data(self.address, self.POWER_CTL, self.MEASURE)
 
     def setBandwidthRate(self, rate_flag):
-        bus.write_byte_data(self.address, self.BW_RATE, rate_flag)
+        self.bus.write_byte_data(self.address, self.BW_RATE, rate_flag)
 
     # set the measurement range for 10-bit readings
     def setRange(self, range_flag):
-        value = bus.read_byte_data(self.address, self.DATA_FORMAT)
+        value = self.bus.read_byte_data(self.address, self.DATA_FORMAT)
 
         value &= ~0x0F
         value |= range_flag
         value |= 0x08
 
-        bus.write_byte_data(self.address, self.DATA_FORMAT, value)
+        self.bus.write_byte_data(self.address, self.DATA_FORMAT, value)
 
     # returns the current reading from the sensor for each axis
     #
@@ -69,7 +70,7 @@ class ADXL345:
     #    False (default): result is returned in m/s^2
     #    True           : result is returned in gs
     def getAxes(self, gforce=False):
-        bytes = bus.read_i2c_block_data(self.address, self.AXES_DATA, 6)
+        bytes = self.bus.read_i2c_block_data(self.address, self.AXES_DATA, 6)
 
         x = bytes[0] | (bytes[1] << 8)
         if (x & (1 << 16 - 1)):
