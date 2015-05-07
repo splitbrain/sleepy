@@ -36,16 +36,12 @@ class ADXL345:
 
     address = None
     bus = None
-    simulate = False
 
-    def __init__(self, address=0x53, simulate=False):
-        self.simulate = simulate
-        if self.simulate:
-            return
-
+    def __init__(self, address=0x53):
         # select the correct i2c bus for this revision of Raspberry Pi
         revision = ([l[12:-1] for l in open('/proc/cpuinfo', 'r').readlines() if l[:8] == "Revision"] + ['0000'])[0]
         self.bus = smbus.SMBus(1 if int(revision, 16) >= 4 else 0)
+
 
         self.address = address
         self.setBandwidthRate(self.BW_RATE_100HZ)
@@ -53,19 +49,13 @@ class ADXL345:
         self.enableMeasurement()
 
     def enableMeasurement(self):
-        if self.simulate:
-            return
         self.bus.write_byte_data(self.address, self.POWER_CTL, self.MEASURE)
 
     def setBandwidthRate(self, rate_flag):
-        if self.simulate:
-            return
         self.bus.write_byte_data(self.address, self.BW_RATE, rate_flag)
 
     # set the measurement range for 10-bit readings
     def setRange(self, range_flag):
-        if self.simulate:
-            return
         value = self.bus.read_byte_data(self.address, self.DATA_FORMAT)
 
         value &= ~0x0F
@@ -80,9 +70,6 @@ class ADXL345:
     #    False (default): result is returned in m/s^2
     #    True           : result is returned in gs
     def getAxes(self, gforce=False):
-        if self.simulate:
-            return {"x": 0.0, "y": 0.0, "z": 1.0}
-
         bytes = self.bus.read_i2c_block_data(self.address, self.AXES_DATA, 6)
 
         x = bytes[0] | (bytes[1] << 8)

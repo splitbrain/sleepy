@@ -151,7 +151,7 @@ class Sleepy(Frame):
         """
         Update the temperature every minute
         """
-        t = sensor.DS18B20(simulate=True) #FIXME should be set from CLI parameter
+        t = sensor.DS18B20()
         temp = "%0.2f °C" % (t.read_temp())
         self.temperature.configure(text=temp)
         self.parent.after(60*1000, self.update_temperature)
