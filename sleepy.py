@@ -4,7 +4,8 @@
 import Tkconstants as TkC
 from Tkinter import Tk, Frame, Label
 from PIL import ImageTk as itk
-import sensor
+#import sensor
+import sim_sensor as sensor
 import glob
 import json
 import os
