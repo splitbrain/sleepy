@@ -4,7 +4,8 @@
 import Tkconstants as TkC
 from Tkinter import Tk, Frame, Label
 from PIL import ImageTk as itk
-import sensor
+#import sensor
+import sim_sensor as sensor
 import glob
 import json
 import os
@@ -151,7 +152,7 @@ class Sleepy(Frame):
         """
         Update the temperature every minute
         """
-        t = sensor.DS18B20(simulate=True) #FIXME should be set from CLI parameter
+        t = sensor.DS18B20()
         temp = "%0.2f °C" % (t.read_temp())
         self.temperature.configure(text=temp)
         self.parent.after(60*1000, self.update_temperature)

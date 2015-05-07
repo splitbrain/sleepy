@@ -11,13 +11,8 @@ class DS18B20:
 
     current = None
     device_file = None
-    simulate=False
 
-    def __init__(self, simulate=False):
-        self.simulate = simulate
-        if self.simulate:
-            return
-
+    def __init__(self):
         base_dir = '/sys/bus/w1/devices/'
         device_folder = glob.glob(base_dir + '28*')[0]
         self.device_file = device_folder + '/w1_slave'
@@ -37,10 +32,6 @@ class DS18B20:
         Reads the current temperature from the sensor, retrying on errors
         :return:
         """
-        if self.simulate:
-            self.current = 21.34
-            return self.current
-
         lines = self.read_temp_raw()
         while lines[0].strip()[-3:] != 'YES':
             print "retry"
