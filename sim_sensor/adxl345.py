@@ -1,14 +1,22 @@
 # simulator for ADXL345 Python library for Raspberry Pi 
 #
 
+import numpy
+import time
+import os
 
 class ADXL345:
     # ADXL345 constants
     EARTH_GRAVITY_MS2 = 9.80665
     SCALE_MULTIPLIER = 0.004
+    SIMULATION_FILENAME = 'simulator_data/example_night.csv'
 
     def __init__(self, address=0x53):
-        pass
+        with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                               self.SIMULATION_FILENAME),'r') as sim_file:
+            (self.t,self.x,self.y,self.z)=numpy.loadtxt(sim_file,
+                delimiter=',',unpack=True)
+        self.time_offset=self.t[0]-time.time()
 
     def enableMeasurement(self):
         pass
@@ -27,11 +35,13 @@ class ADXL345:
     #    True           : result is returned in gs
     def getAxes(self, gforce=False):
 
-        x=0;
-        y=0;
-        z=0;
-        #the next part does nothing
-        #but we will keep it around for the future
+        cur_epoch_time=time.time()
+        t_search=cur_epoch_time+self.time_offset
+        index=numpy.searchsorted(self.t,t_search)
+        x=self.x[index]
+        y=self.y[index]
+        z=self.z[index]
+
         if gforce == False:
             x = x * self.EARTH_GRAVITY_MS2
             y = y * self.EARTH_GRAVITY_MS2
