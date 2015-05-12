@@ -16,6 +16,7 @@ import urllib
 import urllib2
 import thread
 import datetime
+import math
 
 
 class Palette:
@@ -115,6 +116,7 @@ class Sleepy(Frame):
     calendar = None
     weather = None
     temperature = None
+    sleep_phase = None
 
     def __init__(self, parent):
         Frame.__init__(self, parent, background=Palette.background)
@@ -134,13 +136,21 @@ class Sleepy(Frame):
                               font=calendar_font)
         self.calendar.place(x=4, y=70)
 
+        #init the sleep phase indicator
+        sleep_phase_font = tkFont.Font(family='Droid Sans', size=14)
+        self.sleep_phase = Label(self, text="Heavy sleep", 
+                              fg=Palette.primary, bg=Palette.background,
+                              font=sleep_phase_font)
+        self.sleep_phase.place(x=4, y=90)
+
         # init the weather
         self.weather = Weather(self, 320, 82)
         self.weather.place(x=0, y=(240 - 82))
 
         # init the temperature
         temperature_font = tkFont.Font(family='Droid Sans', size=12)
-        self.temperature = Label(self, text="?? °C", fg=Palette.secondary, bg=Palette.background, font=temperature_font)
+        self.temperature = Label(self, text="?? °C", fg=Palette.secondary, 
+                                 bg=Palette.background, font=temperature_font)
         self.temperature.place(x=240, y=50)
 
         # print tkFont.families()
@@ -157,6 +167,7 @@ class Sleepy(Frame):
         self.update_clock()
         self.update_temperature()
         self.fetch_weather_thread()
+        self.monitor_sleep_phase_thread()
 
     def update_clock(self):
         """
@@ -168,6 +179,12 @@ class Sleepy(Frame):
         self.calendar.configure(text=cal)
 
         self.parent.after(10000, self.update_clock)
+
+    def update_sleep_phase(self,sleep_phase):
+        """
+        Change the current sleep phase indication
+        """
+        self.sleep_phase.configure(text=sleep_phase)
 
     def update_temperature(self):
         """
@@ -212,6 +229,60 @@ class Sleepy(Frame):
             # call again in 1 minute
             self.parent.after(1000 * 60 * 1, self.fetch_weather_thread)
 
+    def monitor_sleep_phase_thread(self):
+        """
+        start a thread to monitor the sleep phase
+        """
+        thread.start_new_thread(self.monitor_sleep_phase, ())
+
+
+    def monitor_sleep_phase(self):
+        """
+        monitor the sleep status of the sleeper
+        """
+ 
+       #speedup_factor speeds up the process for testing
+        #it should be set to 1 for normal operation
+        speedup_factor=100
+ 
+        #constants
+        #FIXME: add to configuration file
+        accelerometer_calibrated_one=1.02
+        accelerometer_time_resolution=1.0/speedup_factor
+        awake_threshold=0.2
+        light_sleep_threshold=0.05
+        awake_time_constant=600/speedup_factor
+        light_sleep_time_constant=600/speedup_factor
+ 
+        #assume at beginning that sleeper is fast asleep and has been forever
+        sleep_phase='heavy sleep'
+        last_awake_spike_time=float("-inf")
+        last_light_sleep_spike_time=float("-inf")
+       
+        accelerometer=sensor.ADXL345()
+        while True:
+            prev_status=sleep_phase
+            now=time.time()
+            (x,y,z)=accelerometer.getAxes(True)
+            resultant=math.sqrt(x**2+y**2+z**2)
+            spike=math.fabs(resultant-accelerometer_calibrated_one)
+            #print(spike)
+            if spike>awake_threshold:
+                last_awake_spike_time=now
+            elif spike>light_sleep_threshold:
+                last_light_sleep_spike_time=now
+ 
+            if now - last_awake_spike_time < awake_time_constant:
+                sleep_phase='awake'
+            elif now - last_light_sleep_spike_time < light_sleep_time_constant:
+                sleep_phase='light sleep'
+            else:
+                sleep_phase='heavy sleep'
+ 
+            if sleep_phase != prev_status:
+                self.update_sleep_phase(sleep_phase)
+ 
+            time.sleep(accelerometer_time_resolution)
 
 def main():
     root = Tk()
