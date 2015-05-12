@@ -97,7 +97,7 @@ class ADXL345:
         y = round(y, 4)
         z = round(z, 4)
 
-        return {"x": x, "y": y, "z": z}
+        return (x, y, z)
 
 
 if __name__ == "__main__":

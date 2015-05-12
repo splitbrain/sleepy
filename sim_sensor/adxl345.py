@@ -20,6 +20,7 @@ class ADXL345:
 
         csvfile = open(path, 'r')
         self.csvreader = csv.reader(csvfile, delimiter=',')
+        [self.t0, x, y, z] = map(float, next(self.csvreader))
 
     def enableMeasurement(self):
         pass
@@ -47,8 +48,8 @@ class ADXL345:
         x = round(x, 4)
         y = round(y, 4)
         z = round(z, 4)
-
-        return {"x": x, "y": y, "z": z}
+        print(t-self.t0)
+        return (x, y, z)
 
 
 if __name__ == "__main__":
